@@ -24,11 +24,29 @@ app.get("/api/hello", function (req, res) {
   res.json({greeting: 'hello API'});
 });
 
-let timestamp = new Date().toUTCString()
-console.log(timestamp)
-app.get("/timestamp", (req, res) => {
-  res.json({timestamp: timestamp })
-})
+app.get("/timestamp/api/:date?", (req, res) => {
+  let dateString = req.params.date;
+  let date;
+
+  // Check if dateString is empty to use current date, else parse the dateString
+  if (!dateString) {
+    date = new Date();
+  } else {
+    // Check if dateString is a unix timestamp (in milliseconds)
+    if (!isNaN(dateString)) {
+      date = new Date(parseInt(dateString));
+    } else {
+      date = new Date(dateString);
+    }
+  }
+
+  // Validate the date object
+  if (date.toString() === "Invalid Date") {
+    res.json({ error: "Invalid Date" });
+  } else {
+    res.json({ unix: date.getTime(), utc: date.toUTCString() });
+  }
+});
 
 // Listen on port set in environment variable or default to 3000
 var listener = app.listen(process.env.PORT || 3000, function () {
